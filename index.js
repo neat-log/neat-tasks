@@ -61,7 +61,6 @@ function runTasks (taskList, cb) {
         activeTask.bus.removeAllListeners()
         state.activeTask = activeTask = null
         if (!taskList.length) return done()
-        bus.emit('render')
         runTask(taskList.shift())
       }
     }
@@ -125,6 +124,7 @@ Task.prototype.run = function (cb) {
   self.task(state, self.bus, once(done))
 
   function done (err) {
+    self.bus.emit('render')
     if (!err) {
       state.status = 'pass'
       state.done = true
