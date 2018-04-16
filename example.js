@@ -17,6 +17,19 @@ var tasks = [
         state.count--
         bus.emit('render')
       }, 1000)
+    },
+    skip: function (cb) {
+      cb(false) // don't skip
+    }
+  },
+  {
+    title: 'Count to 3',
+    task: function (state, bus, done) {
+      // will be skipped
+      done('FAIL - should be skipped')
+    },
+    skip: function (cb) {
+      cb('We skipped this task')
     }
   },
   {
@@ -63,6 +76,7 @@ function footer (state) {
   return '\n' + output(`
     Completed All Tasks
       Pass: ${state.pass}
+      Skipped: ${state.skipped}
       Fail: ${state.fail}
   `)
 }

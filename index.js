@@ -34,6 +34,7 @@ function runTasks (taskList, cb) {
   function use (state, bus) {
     state = Object.assign(state, {
       pass: 0,
+      skipped: 0,
       fail: 0,
       totalCount: totalCount,
       count: taskList.length ? doneTasks.length + 1 : totalCount
@@ -55,6 +56,7 @@ function runTasks (taskList, cb) {
 
       function taskDone (err) {
         if (err) state.fail++
+        else if (activeTask.state.skipped) state.skipped++
         else state.pass++
 
         doneTasks.push(activeTask.render()) // save final render state
@@ -86,6 +88,7 @@ function Task (opts) {
   self.state = {
     title: opts.title
   }
+  self.skip = opts.skip || function (cb) { cb() }
 }
 
 Task.prototype.render = function () {
@@ -102,14 +105,16 @@ Task.prototype.render = function () {
 
     function status (taskStatus) {
       if (state.status === 'pass') return chalk.greenBright(figures.tick) + ' '
-      if (state.status === 'fail') return chalk.redBright(figures.cross) + ' '
+      else if (state.status === 'fail') return chalk.redBright(figures.cross) + ' '
+      else if (state.status === 'skipped') return chalk.yellowBright(figures.warning) + ' '
       return chalk.magentaBright(spinner.view()) + ' '
     }
   }
 
   function taskOutput () {
     if (state.done && typeof state.done === 'string') return '  ' + chalk.dim(state.done)
-    if (self.view) return self.view(state)
+    if (state.skipped) return ''
+    else if (self.view) return self.view(state)
     return ''
   }
 }
@@ -119,9 +124,18 @@ Task.prototype.run = function (cb) {
   var state = Object.assign(self.state, {
     title: self.title,
     status: 'running',
-    done: false
+    done: false,
+    skipped: false
   })
-  self.task(state, self.bus, once(done))
+  self.skip(function (skip) {
+    if (!skip) return self.task(state, self.bus, once(done))
+    self.bus.emit('render')
+    state.status = 'skipped'
+    state.skipped = true
+    state.done = true
+    if (typeof skip === 'string') state.title = skip
+    cb()
+  })
 
   function done (err) {
     self.bus.emit('render')

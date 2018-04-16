@@ -66,6 +66,12 @@ Tasks are run one at a time. They can do anything and print out anything to ther
   task: function (state, bus, done) {
     // DO STUFF
     done() // Call done() when done
+  },
+  skip: function (cb) {
+    cb(shouldSkip) // Should we skip this task? 
+  },
+  view: function (state) {
+    // neat-log view
   }
 }
 ```
@@ -74,6 +80,11 @@ Use `done([fail])` to complete the task.
 
 * Pass: tests are considered passing if when calling, `done(fail)`, `fail` is false.
 * Fail: Anything truthy is considered a failure. If you pass a string, it will print the message.
+
+Use the skip `cb([skip])` to skip the task. 
+
+* Skip: Anything truthy is considered a failure. If you pass a string, it will change the title after skipping
+* Run: Pass false to run the test
 
 ## License
 
