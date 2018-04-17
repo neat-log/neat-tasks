@@ -18,8 +18,8 @@ var tasks = [
         bus.emit('render')
       }, 1000)
     },
-    skip: function (cb) {
-      cb(false) // don't skip
+    skip: function (done) {
+      done() // don't skip
     }
   },
   {
@@ -28,8 +28,8 @@ var tasks = [
       // will be skipped
       done('FAIL - should be skipped')
     },
-    skip: function (cb) {
-      cb('We skipped this task')
+    skip: function (done) {
+      done('We skipped this task')
     }
   },
   {
