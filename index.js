@@ -112,9 +112,13 @@ Task.prototype.render = function () {
   }
 
   function taskOutput () {
-    if (state.done && typeof state.done === 'string') return '  ' + chalk.dim(state.done)
-    if (state.skipped) return ''
-    else if (self.view) return self.view(state)
+    if (state.done || state.skipped) {
+      if (typeof state.done === 'string') {
+        if (state.output) return state.output + '\n' + state.done
+        else return '  ' + chalk.dim(state.done)
+      }
+      return state.output || ''
+    } else if (self.view) return self.view(state)
     return ''
   }
 }
